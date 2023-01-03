@@ -29,6 +29,11 @@ const int spABORT_LAUNCH_SIZE = sizeof spABORT_LAUNCH / sizeof spABORT_LAUNCH[0]
 #define PIN_BUZZER 3
 #define PIN_CONTINUITY_CHECK 4
 #define PIN_PTT_TRANSMIT 5
+#define PIN_DTMF_Q1 A0
+#define PIN_DTMF_Q2 A1
+#define PIN_DTMF_Q3 A2
+#define PIN_DTMF_Q4 A3
+#define PIN_DTMF_STQ A4 // Represents data ready
 
 Talkie voice; // It is implied that this uses pin 3 and pin 11
 Timer<10> timer;
@@ -41,6 +46,11 @@ void setup() {
   pinMode(PIN_BUZZER, OUTPUT);
   pinMode(PIN_CONTINUITY_CHECK, INPUT_PULLUP);
   pinMode(PIN_PTT_TRANSMIT, OUTPUT);
+  pinMode(PIN_DTMF_Q1, INPUT);
+  pinMode(PIN_DTMF_Q2, INPUT);
+  pinMode(PIN_DTMF_Q3, INPUT);
+  pinMode(PIN_DTMF_Q4, INPUT);
+  pinMode(PIN_DTMF_STQ, INPUT);
 
   // Transmit callsign & startup message
   transmit(spCALLSIGN, spCALLSIGN_SIZE);
@@ -126,4 +136,24 @@ void startIntervalBuzzer() {
 
 void stopIntervalBuzzer() {
   timer.cancel(buzzerTask);
+}
+
+/// Returns the DTMF digit read. Blocking until data is available and back to unavailable
+uint8_t readDTMFInput() {
+  // Block until data is available
+  while (digitalRead(PIN_DTMF_STQ) == LOW) {
+    delay(15);
+  }
+
+  uint8_t numberPressed = ( 0x00 | (digitalRead(PIN_DTMF_Q1)<<0) | (digitalRead(PIN_DTMF_Q2)<<1) | (digitalRead(PIN_DTMF_Q3)<<2) | (digitalRead(PIN_DTMF_Q4)<<3) );
+  if (numberPressed == 10) {
+    numberPressed = 0; // Bit output for DTMF 0 is 10 but it's easier to handle it as 0
+  }
+
+  // Block before returning until the data is not transmitted anymore. This avoids successive calls to readDTMFInput returning the same value if the transmission isn't finished
+  while (digitalRead(PIN_DTMF_STQ) == HIGH) {
+    delay(5);
+  }
+
+  return numberPressed;
 }
