@@ -1,3 +1,4 @@
+#include <LiquidCrystal.h>
 #include "pitches.h" // Used for buzzer tones
 #include "arduino-timer.h"
 #include "Talkie.h"
@@ -5,14 +6,7 @@
 #include "Vocab_US_Large.h" // Phonetic alphabet & most wordage
 #include "Vocab_US_Acorn.h" // Word completions
 
-// enum State {
-//   TRIGGER_LAUNCH,
-//   POST_LAUNCH
-// };
-
-// enum State state = TRIGGER_LAUNCH;
-
-// Language defined
+// Language definitions
 const uint8_t *spCALLSIGN[] = { spPAUSE2, sp4_VICTOR, sp4_ALPHA, sp3_TWO, sp4_FOXTROT, sp4_ECHO, sp4_ZULU };
 const int spCALLSIGN_SIZE = sizeof spCALLSIGN / sizeof spCALLSIGN[0];
 const uint8_t *spCONTINUITY_CHECK_BEGIN[] = { spPAUSE2, sp2_CAUTION, spPAUSE1, sp2_START, spa__ING, sp4_IGNITION, sp2_CIRCUIT, sp2_TEST };
@@ -24,7 +18,7 @@ const int spCONTINUITY_CHECK_ERROR_SIZE = sizeof spCONTINUITY_CHECK_ERROR / size
 const uint8_t *spABORT_LAUNCH[] = { spPAUSE2, sp4_NO, sp2_GO, spPAUSE2, sp2_ABORT, spa__ING, sp5_LAUNCH };
 const int spABORT_LAUNCH_SIZE = sizeof spABORT_LAUNCH / sizeof spABORT_LAUNCH[0];
 
-
+// Pin definitions
 #define PIN_TRIGGER_LAUNCH 2
 #define PIN_BUZZER 3
 #define PIN_CONTINUITY_CHECK 4
@@ -35,15 +29,28 @@ const int spABORT_LAUNCH_SIZE = sizeof spABORT_LAUNCH / sizeof spABORT_LAUNCH[0]
 #define PIN_DTMF_Q4 A3
 #define PIN_DTMF_STQ A4 // Represents data ready
 
+#define PIN_LCD_RS 13
+#define PIN_LCD_EN 12
+#define PIN_LCD_D4 9
+#define PIN_LCD_D5 8
+#define PIN_LCD_D6 7
+#define PIN_LCD_D7 6
+#define LCD_COLUMN_COUNT 16
+#define LCD_ROW_COUNT 2
+
 Talkie voice; // It is implied that this uses pin 3 and pin 11
 Timer<10> timer;
+
+LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 void setup() {
   //start serial connection
   Serial.begin(9600);
 
   pinMode(PIN_TRIGGER_LAUNCH, OUTPUT);
+  digitalWrite(PIN_TRIGGER_LAUNCH, LOW);
   pinMode(PIN_BUZZER, OUTPUT);
+  digitalWrite(PIN_BUZZER, LOW);
   pinMode(PIN_CONTINUITY_CHECK, INPUT_PULLUP);
   pinMode(PIN_PTT_TRANSMIT, OUTPUT);
   pinMode(PIN_DTMF_Q1, INPUT);
@@ -52,6 +59,8 @@ void setup() {
   pinMode(PIN_DTMF_Q4, INPUT);
   pinMode(PIN_DTMF_STQ, INPUT);
 
+  lcd.begin(LCD_COLUMN_COUNT, LCD_ROW_COUNT);
+  
   // Transmit callsign & startup message
   transmit(spCALLSIGN, spCALLSIGN_SIZE);
 
