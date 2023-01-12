@@ -1,4 +1,4 @@
 # launchbox
 An amateur radio controlled model rocketry launch platform 
 
-![LaunchBox (1)](https://user-images.githubusercontent.com/7923672/212096138-a5d5d267-84c8-45c0-afda-91588d6c6032.png)
+![LaunchBox (2)](https://user-images.githubusercontent.com/7923672/212105002-0941da4a-98ec-43f7-a1b3-1d5abd35d50c.png)
